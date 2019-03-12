@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#BSUB -P PROJ123
+#BSUB -J map_ranks
+#BSUB -o map_ranks.%J
+#BSUB -nnodes 2
+#BSUB -W 10
+#BSUB -alloc_flags gpumps
+
+date
+
+jsrun -n2 -c42 -g6 -a7 -r1 ./local_mpi_to_gpu | sort
