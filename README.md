@@ -111,7 +111,7 @@ In the "Other Intialization" section of the code, we determine the hardware thre
     cudaGetDevice(&device);
 ```
 
-And, finally, we print out the global ID, node-local ID, hardware thread ID, GPU ID, and node hostname  associated with each MPI rank, and close the MPI context.
+And, finally, we print out the global ID, node-local ID, hardware thread ID, GPU ID (as seen by the CUDA runtime), and node hostname  associated with each MPI rank, and close the MPI context.
 
 ```c
     /* -------------------------------------------------------------------------------------------
