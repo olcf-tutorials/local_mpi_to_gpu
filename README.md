@@ -4,7 +4,7 @@ In this tutorial, we will demonstrate how to use node-local MPI rank IDs to map 
 
 Before getting started, consider the following example to understand what we mean by "node-local" MPI rank ID and also to motivate why this might be useful:
 
-Assume you have 24 total MPI ranks spread over 4 compute nodes (with 6 ranks on each node). Then, globally, they would be numbered 0-23. However, their node-local rank IDs would be 0-5 on each node, which is much easier to deal with if you need to manually map MPI ranks to GPUs.
+Assume you have 24 total MPI ranks spread over 4 compute nodes (with 6 ranks on each node). Then, globally, they would be numbered 0-23. However, their node-local rank IDs would be 0-5 on each node, which might be easier to deal with if you need to manually map MPI ranks to GPUs.
 
 Now let's walk through the code to see how it works:
 
@@ -67,8 +67,6 @@ int main(int argc, char *argv[])
 ```
 
 Just inside the `main` function, we initialize the MPI context, determine the total number of MPI ranks, determine the (global) ID for each MPI rank, find the hostname of the node that each MPI rank is running on, and determine the node-local ID for each MPI rank. For the last part, we simply read the `OMPI_COMM_WORLD_LOCAL_RANK` environment variable and convert the string to an integer (since it will be used as an integer later). 
-
-NOTE: 
 
 ```c
     /* -------------------------------------------------------------------------------------------
@@ -136,7 +134,7 @@ $ module load cuda
 Now compile the program
 
 ```
-$make
+$ make
 ```
 
 Now submit the job using the `submit.lsf` batch script (make sure to change `PROJ123` to a project you are associated with):
@@ -145,7 +143,7 @@ Now submit the job using the `submit.lsf` batch script (make sure to change `PRO
 $ bsub submit.lsf
 ```
 
-You can check the status of your job with the `jobstat` command. Once your job has completed, you can view the results in the output file named `mpi_ranks.JOBID`:
+The `jsrun` line in this script will launch 14 total MPI ranks (7 on each of the 2 nodes). You can check the status of your job with the `jobstat` command. Once your job has completed, you can view the results in the output file named `mpi_ranks.JOBID`:
 
 ```
 $ cat map_ranks.JOBID
@@ -171,7 +169,11 @@ Global Rank: 013 of 014, Local Rank: 006, HWThread 026, GPU: 0 Node: h11n13
 
 Notice that there are 14 total MPI ranks (numbered 0-13), with 7 ranks on each of the 2 compute nodes (h11n08 and h11n13), but their node-local MPI rank IDs are 0-6 within each node. Also notice that local MPI rank IDs 0-5 get mapped to GPUs 0-5, but local MPI rank ID 6 gets mapped to GPU 0; this is because of the round-robin fashion that we mapped ranks to GPUs. 
 
-NOTE: When multiple MPI ranks will access the same GPU, the <a href="https://www.olcf.ornl.gov/for-users/system-user-guides/summit/summit-user-guide/#volta-multi-process-service">CUDA Multi-Process Server (MPS)</a> should be started using `-alloc_flags gpumps` in your batch script.
+>NOTE: This simple example only shows how to use the node-local MPI rank IDs to map ranks to GPUs. However, the *mapping of MPI ranks to CPU cores* used in this example is not very efficient (since all MPI ranks are associated with CPU cores on the first socket of a node, while the GPUs those MPI ranks map to are on both sockets - i.e., the MPI ranks mapped to GPUs 3, 4, and 5 must reach across to the second socket to communicate with their GPUs). How you choose to map MPI ranks to CPU cores (defined via `jsrun`) will be specific to each application. For the example above, a better approach might be to create 2 resource sets per node (each consisting of the CPUs and GPUs on a socket - i.e., 21 physical CPU cores and 3 GPUs). That way, the MPI ranks on the first socket only have access to the GPUs on the first socket.
+
+>NOTE: GPUs IDs (as labeled by the CUDA runtime) start over at 0 within each resource set. So defining 2 resource sets per node (where each resource set consists of the CPUs and GPUs on a socket) would show the GPUs in the first resource set labeled as 0-2 and also the GPUs in the second resource set would be labeled as 0-2 (even though the GPUs in the second resource set would actually be GPUs 3-5 as shown on the node diagrams).
+
+>NOTE: When multiple MPI ranks will access the same GPU, the <a href="https://www.olcf.ornl.gov/for-users/system-user-guides/summit/summit-user-guide/#volta-multi-process-service">CUDA Multi-Process Server (MPS)</a> should be started using `-alloc_flags gpumps` in your batch script.
 
 ## Helpful Links
 
