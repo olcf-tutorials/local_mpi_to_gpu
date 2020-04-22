@@ -173,7 +173,7 @@ Notice that there are 14 total MPI ranks (numbered 0-13), with 7 ranks on each o
 
 >NOTE: GPUs IDs (as labeled by the CUDA runtime) start over at 0 within each resource set. So defining 2 resource sets per node (where each resource set consists of the CPUs and GPUs on a socket) would show the GPUs in the first resource set labeled as 0-2 and also the GPUs in the second resource set would be labeled as 0-2 (even though the GPUs in the second resource set would actually be GPUs 3-5 as shown on the node diagrams).
 
->NOTE: When multiple MPI ranks will access the same GPU, the <a href="https://www.olcf.ornl.gov/for-users/system-user-guides/summit/summit-user-guide/#volta-multi-process-service">CUDA Multi-Process Server (MPS)</a> should be started using `-alloc_flags gpumps` in your batch script.
+>NOTE: When multiple MPI ranks will access the same GPU, the <a href="https://docs.olcf.ornl.gov/systems/summit_user_guide.html#volta-multi-process-service">CUDA Multi-Process Server (MPS)</a> should be started using `-alloc_flags gpumps` in your batch script.
 
 ## Helpful Links
 
